@@ -30,22 +30,6 @@ To prevent a contact from being compared with itself, the system checks contact 
 
 ### Input File Requirements
 
-The application requires the input file to be in CSV (Comma-Separated Values) format, following a specific structure.
-Each record in the CSV should represent a contact with the following fields:
-
-    Contact ID
-    First Name
-    Last Name
-    Email
-    Zip Code
-    Address
-
-The CSV file must be placed in the resources folder located at the root of the application directory.
-
-## File Format and Location
-
-### Input File Requirements
-
 The application requires the input file to be in CSV (Comma-Separated Values) format, following a specific structure. Each record in the CSV should represent a contact with the following fields:
 
     Contact ID
