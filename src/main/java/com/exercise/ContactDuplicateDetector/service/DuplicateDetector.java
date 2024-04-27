@@ -2,7 +2,7 @@ package com.exercise.ContactDuplicateDetector.service;
 
 import com.exercise.ContactDuplicateDetector.model.Contact;
 import com.exercise.ContactDuplicateDetector.model.DuplicateResult;
-import com.exercise.ContactDuplicateDetector.util.StringsUtils;
+import com.exercise.ContactDuplicateDetector.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class DuplicateDetector {
         if (sameAddressContacts.size() > 1) {
             return sameAddressContacts.stream()
                     .filter(notSameContact)
-                    .filter(c -> StringsUtils.levenshteinDistance(contact.lastName(), c.lastName()) <= 2)
+                    .filter(c -> StringUtils.levenshteinDistance(contact.lastName(), c.lastName()) <= 2)
                     .map(c -> new DuplicateResult(contact.contactId(), c.contactId(), "Medium"))
                     .collect(Collectors.toList());
         }
@@ -56,7 +56,7 @@ public class DuplicateDetector {
         if (sameZipCodeContacts.size() > 1) {
             return sameZipCodeContacts.stream()
                     .filter(notSameContact)
-                    .filter(c -> !c.email().equals(contact.email()) && StringsUtils.levenshteinDistance(contact.lastName(), c.lastName()) <= 2)
+                    .filter(c -> !c.email().equals(contact.email()) && StringUtils.levenshteinDistance(contact.lastName(), c.lastName()) <= 2)
                     .map(c -> new DuplicateResult(contact.contactId(), c.contactId(), "Low"))
                     .collect(Collectors.toList());
         }

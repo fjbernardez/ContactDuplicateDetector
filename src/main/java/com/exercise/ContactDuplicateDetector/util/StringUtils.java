@@ -1,6 +1,6 @@
 package com.exercise.ContactDuplicateDetector.util;
 
-public class StringsUtils {
+public class StringUtils {
     public static int levenshteinDistance(String x, String y) {
         x = x.toLowerCase();
         y = y.toLowerCase();
@@ -13,10 +13,19 @@ public class StringsUtils {
         for (int i = 1; i <= x.length(); i++) {
             cost[0] = i;
             int nw = i - 1;
+
             for (int j = 1; j <= y.length(); j++) {
-                int cj = Math.min(1 + Math.min(cost[j], cost[j - 1]), x.charAt(i - 1) == y.charAt(j - 1) ? nw : nw + 1);
+
+                // calculate cost of possibles operations
+                int insertionOrElimination = 1 + Math.min(cost[j], cost[j - 1]);
+                int substitution = x.charAt(i - 1) == y.charAt(j - 1) ? nw : nw + 1;
+
+                // choose less cost
+                int cost_j = Math.min(insertionOrElimination, substitution);
+
+                // update north-west and cost[j]
                 nw = cost[j];
-                cost[j] = cj;
+                cost[j] = cost_j;
             }
         }
 
