@@ -28,6 +28,18 @@ public class DuplicateDetector {
         this.contactsByZipCode = contactsByZipCode;
     }
 
+    // for test proposal
+    public void execute(List<DuplicateResult> allDuplicateResults) {
+
+        for (Contact contact : this.allContacts) {
+
+            List<DuplicateResult> duplicateResults = this.findDuplicates(contact);
+            if (!duplicateResults.isEmpty()) {
+                allDuplicateResults.addAll(duplicateResults);
+            }
+        }
+    }
+
     public List<DuplicateResult> findDuplicates(Contact contact) {
 
         Predicate<Contact> notSameContact = c -> c.contactId() != contact.contactId();
