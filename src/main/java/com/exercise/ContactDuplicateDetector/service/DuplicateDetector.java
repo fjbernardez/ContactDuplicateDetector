@@ -7,6 +7,9 @@ import com.exercise.ContactDuplicateDetector.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -26,6 +29,30 @@ public class DuplicateDetector {
         this.contactsByEmail = contactsByEmail;
         this.contactsByAddress = contactsByAddress;
         this.contactsByZipCode = contactsByZipCode;
+    }
+
+    // for test proposal
+    public void execute(List<DuplicateResult> allDuplicateResults) {
+        int numCores = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numCores);
+
+        for (Contact contact : this.allContacts) {
+            executor.submit(() -> {
+                List<DuplicateResult> duplicateResults = this.findDuplicates(contact);
+                if (!duplicateResults.isEmpty()) {
+                    allDuplicateResults.addAll(duplicateResults);
+                }
+            });
+
+        }
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
     }
 
     public List<DuplicateResult> findDuplicates(Contact contact) {

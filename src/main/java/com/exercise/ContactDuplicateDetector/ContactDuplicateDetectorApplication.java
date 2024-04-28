@@ -12,7 +12,11 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 public class ContactDuplicateDetectorApplication implements CommandLineRunner {
@@ -24,7 +28,7 @@ public class ContactDuplicateDetectorApplication implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        List<DuplicateResult> allDuplicateResults = new ArrayList<>();
+        List<DuplicateResult> allDuplicateResults = Collections.synchronizedList(new ArrayList<>());
 
         ContactService contactService = new ContactService();
         contactService.loadContacts("src/main/resources/contacts.csv");
@@ -36,12 +40,27 @@ public class ContactDuplicateDetectorApplication implements CommandLineRunner {
                 contactService.getZipCodeIndex()
         );
 
+        int numCores = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(numCores);
+
         for (Contact contact : contactService.getAllContacts()) {
-            List<DuplicateResult> duplicateResults = duplicateDetector.findDuplicates(contact);
-            if (!duplicateResults.isEmpty()) {
-                allDuplicateResults.addAll(duplicateResults);
-            }
+            executor.submit(() -> {
+                List<DuplicateResult> duplicateResults = duplicateDetector.findDuplicates(contact);
+                if (!duplicateResults.isEmpty()) {
+                    allDuplicateResults.addAll(duplicateResults);
+                }
+            });
+
         }
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
+
         writeFile(allDuplicateResults);
     }
 
