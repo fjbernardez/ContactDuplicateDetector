@@ -8,11 +8,14 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class ConcurrentTimeTest {
 
     List<DuplicateResult> allDuplicateResults = Collections.synchronizedList(new ArrayList<>());
-    private final Integer times = 10000;
+    private final Integer times = 100000;
 
     @Test
     void concurrentTime() {
@@ -31,10 +34,23 @@ public class ConcurrentTimeTest {
 
         double startTime = System.currentTimeMillis();
 
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+
         while (timesCopy > 0) {
             allDuplicateResults.clear();
-            duplicateDetector.execute(allDuplicateResults);
+            duplicateDetector.execute(allDuplicateResults, executor);
             timesCopy--;
+        }
+
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
 
         double endTime = System.currentTimeMillis();
